@@ -1,6 +1,92 @@
 // app.js - Livestream Analyzer Frontend Controller
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Localization dictionary for appState elements
+    const dynamicI18n = {
+        zh: {
+            schema_load_failed: '加载结构失败',
+            presets_load_failed: '加载预设失败',
+            ai_find_data: (count) => `由 AI 助手查找到 ${count} 条数据 (内存实时载入)`,
+            find_data: (count, elapsed) => `查找到 ${count} 条数据 (耗时 ${elapsed} 秒)`,
+            query_success_empty: '命令已成功执行（无返回行）。',
+            query_executing: '查询执行中，请稍候...',
+            loading_data: '正在加载数据...',
+            exec_error: '执行出错',
+            query_failed_with_msg: (msg) => `查询执行失败: ${msg}`,
+            no_matching_records: '没有找到匹配的记录',
+            yes: '是',
+            no: '否',
+            showing_rows: (start, end, total) => `显示第 ${start} - ${end} 条，共 ${total} 条数据`,
+            overview_mode: '概览大屏模式',
+            input_sql_prompt: '请输入要执行的 SQL 语句。',
+            chart_error_fields: '生成图表需要同时指定 X 轴 and Y 轴字段。',
+            custom_chart_title: (x, y) => `${x} 与 ${y} 关系图表`,
+            presets: {
+                overview: {
+                    name: '📊 全局概览统计 (Overview Summary)',
+                    description: '获取直播间数量、打赏金额、弹幕评论总数和总打赏人次等核心指标。'
+                },
+                top_spenders: {
+                    name: '💰 土豪打赏排行榜 Top 10 (Top Spenders)',
+                    description: '按打赏总金额降序排列，列出前 10 名打赏金额最高的用户及其打赏次数。'
+                },
+                room_revenue: {
+                    name: '🎟️ 单场直播收入与弹幕排行 (Room Revenue vs Comments)',
+                    description: '查询每场直播的开始时间、打赏总金额与发言总人数，并按收入进行排序。'
+                },
+                hourly_activity: {
+                    name: '🕒 弹幕与打赏随时间（小时）的分布 (Hourly Activity Distribution)',
+                    description: '统计一天中 24 小时内每个小时的弹幕发言量和送礼打赏金额，分析用户活跃时间段。'
+                },
+                comment_loyalty: {
+                    name: '👥 用户忠诚度与发言关联分析 (Interaction Loyalty Analysis)',
+                    description: '分析发言用户中，是否关注直播间、是否打赏直播间的用户比例，探究用户转化率。'
+                }
+            }
+        },
+        ko: {
+            schema_load_failed: '구조 로드 실패',
+            presets_load_failed: '프리셋 로드 실패',
+            ai_find_data: (count) => `AI 어시스턴트가 ${count}개의 데이터를 찾았습니다 (메모리 실시간 로드)`,
+            find_data: (count, elapsed) => `${count}개의 데이터를 찾았습니다 (소요 시간 ${elapsed}초)`,
+            query_success_empty: '명령이 성공적으로 실행되었습니다 (반환된 행 없음).',
+            query_executing: '쿼리 실행 중, 잠시만 기다려 주십시오...',
+            loading_data: '데이터 로딩 중...',
+            exec_error: '실행 오류',
+            query_failed_with_msg: (msg) => `쿼리 실행 실패: ${msg}`,
+            no_matching_records: '일치하는 레코드를 찾을 수 없습니다',
+            yes: '예',
+            no: '아니오',
+            showing_rows: (start, end, total) => `${start} - ${end} 표시 중, 총 ${total}개 데이터`,
+            overview_mode: '개요 대화면 모드',
+            input_sql_prompt: '실행할 SQL 문을 입력하십시오.',
+            chart_error_fields: '차트를 생성하려면 X축과 Y축 필드를 모두 지정해야 합니다.',
+            custom_chart_title: (x, y) => `${x} 및 ${y} 관계 차트`,
+            presets: {
+                overview: {
+                    name: '📊 전체 개요 통계 (Overview Summary)',
+                    description: '라이브 스트림 방 수, 후원 금액, 탄막 댓글 총수 및 총 후원 횟수 등 핵심 지표를 가져옵니다.'
+                },
+                top_spenders: {
+                    name: '💰 큰손 후원 랭킹 Top 10 (Top Spenders)',
+                    description: '총 후원 금액 내림차순으로 정렬하여 상위 10명의 후원 금액이 가장 높은 사용자와 후원 횟수를 나열합니다.'
+                },
+                room_revenue: {
+                    name: '🎟️ 단일 라이브 수익 및 탄막 랭킹 (Room Revenue vs Comments)',
+                    description: '각 라이브 스트림의 시작 시간, 총 후원 금액 및 총 발언 인원을 조회하고 수익순으로 정렬합니다.'
+                },
+                hourly_activity: {
+                    name: '🕒 시간(시간별)에 따른 탄막 및 후원 분포 (Hourly Activity Distribution)',
+                    description: '하루 24시간 중 각 시간대별 탄막 발언량과 선물 후원 금액을 통계 내어 사용자 활성 시간대를 분석합니다.'
+                },
+                comment_loyalty: {
+                    name: '👥 사용자 충성도 및 발언 연관 분석 (Interaction Loyalty Analysis)',
+                    description: '발언 사용자 중 라이브 스트림 팔로우 여부, 후원 여부의 사용자 비율을 분석하여 사용자 전환율을 탐구합니다.'
+                }
+            }
+        }
+    };
+
     // State Variables
     let appState = {
         schema: {},
@@ -128,7 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
             appState.schema = await res.json();
             renderSchema();
         } catch (err) {
-            elements.schemaContainer.innerHTML = `<div class="loading-small" style="color:var(--danger)">加载结构失败: ${err.message}</div>`;
+            const lang = localStorage.getItem('pref_lang') || 'zh';
+            elements.schemaContainer.innerHTML = `<div class="loading-small" style="color:var(--danger)">${dynamicI18n[lang].schema_load_failed}: ${err.message}</div>`;
         }
     }
 
@@ -139,7 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
             appState.presets = await res.json();
             renderPresets();
         } catch (err) {
-            elements.presetsContainer.innerHTML = `<div class="loading-small" style="color:var(--danger)">加载预设失败: ${err.message}</div>`;
+            const lang = localStorage.getItem('pref_lang') || 'zh';
+            elements.presetsContainer.innerHTML = `<div class="loading-small" style="color:var(--danger)">${dynamicI18n[lang].presets_load_failed}: ${err.message}</div>`;
         }
     }
 
@@ -189,13 +277,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderPresets() {
         elements.presetsContainer.innerHTML = '';
+        const lang = localStorage.getItem('pref_lang') || 'zh';
         
         appState.presets.forEach(preset => {
             const card = document.createElement('button');
             card.className = 'preset-card';
+            const presetTrans = dynamicI18n[lang].presets[preset.id];
+            const pName = presetTrans ? presetTrans.name : preset.name;
+            const pDesc = presetTrans ? presetTrans.description : preset.description;
             card.innerHTML = `
-                <h4>${preset.name}</h4>
-                <p>${preset.description}</p>
+                <h4>${pName}</h4>
+                <p>${pDesc}</p>
             `;
             
             card.addEventListener('click', () => {
@@ -411,7 +503,8 @@ document.addEventListener('DOMContentLoaded', () => {
             appState.currentPage = 1;
             appState.sortColumn = null;
             
-            elements.resultsMeta.innerHTML = `由 AI 助手查找到 ${appState.filteredRows.length} 条数据 (内存实时载入)`;
+            const lang = localStorage.getItem('pref_lang') || 'zh';
+            elements.resultsMeta.innerHTML = dynamicI18n[lang].ai_find_data(appState.filteredRows.length);
             elements.tableSearch.value = '';
             
             // 3. Switch to table view
@@ -488,9 +581,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Query Execution ---
 
     async function executeQuery() {
-        const query = elements.sqlEditor.value.trim();
+        const lang = localStorage.getItem('pref_lang') || 'zh';
         if (!query) {
-            showError('请输入要执行的 SQL 语句。');
+            showError(dynamicI18n[lang].input_sql_prompt);
             return;
         }
 
@@ -523,7 +616,8 @@ document.addEventListener('DOMContentLoaded', () => {
             appState.currentPage = 1;
             appState.sortColumn = null;
             
-            elements.resultsMeta.innerHTML = `查找到 ${appState.filteredRows.length} 条数据 (耗时 ${elapsed} 秒)`;
+            const lang = localStorage.getItem('pref_lang') || 'zh';
+            elements.resultsMeta.innerHTML = dynamicI18n[lang].find_data(appState.filteredRows.length, elapsed);
             elements.tableSearch.value = '';
             
             renderResultView();
@@ -565,33 +659,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Table Ingestion and UI Rendering ---
 
     function renderTableLoading() {
+        const lang = localStorage.getItem('pref_lang') || 'zh';
         elements.tableWrapper.innerHTML = `
             <div class="loading-spinner">
                 <div class="spinner"></div>
-                <p>查询执行中，请稍候...</p>
+                <p>${dynamicI18n[lang].query_executing}</p>
             </div>
         `;
-        elements.resultsMeta.innerHTML = '正在加载数据...';
+        elements.resultsMeta.innerHTML = dynamicI18n[lang].loading_data;
     }
 
     function renderTableError(msg) {
+        const lang = localStorage.getItem('pref_lang') || 'zh';
         elements.tableWrapper.innerHTML = `
             <div class="empty-state" style="color:var(--danger)">
                 <span class="empty-icon">❌</span>
-                <p>查询执行失败: ${msg}</p>
+                <p>${dynamicI18n[lang].query_failed_with_msg(msg)}</p>
             </div>
         `;
-        elements.resultsMeta.innerHTML = '执行出错';
+        elements.resultsMeta.innerHTML = dynamicI18n[lang].exec_error;
     }
 
     function renderResultView() {
         const { columns, rows } = appState.queryResult;
+        const lang = localStorage.getItem('pref_lang') || 'zh';
         
         if (columns.length === 0) {
             elements.tableWrapper.innerHTML = `
                 <div class="empty-state">
                     <span class="empty-icon">✓</span>
-                    <p>命令已成功执行（无返回行）。</p>
+                    <p>${dynamicI18n[lang].query_success_empty}</p>
                 </div>
             `;
             return;
@@ -627,8 +724,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         cardsHtml += '</div>';
 
+        const lang = localStorage.getItem('pref_lang') || 'zh';
         elements.tableWrapper.innerHTML = cardsHtml;
-        elements.paginationInfo.innerHTML = '概览大屏模式';
+        elements.paginationInfo.innerHTML = dynamicI18n[lang].overview_mode;
     }
 
     function renderDataTable() {
@@ -636,12 +734,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const endIdx = startIdx + appState.pageSize;
         const pageRows = appState.filteredRows.slice(startIdx, endIdx);
         const { columns } = appState.queryResult;
+        const lang = localStorage.getItem('pref_lang') || 'zh';
 
         if (appState.filteredRows.length === 0) {
             elements.tableWrapper.innerHTML = `
                 <div class="empty-state">
                     <span class="empty-icon">🔍</span>
-                    <p>没有找到匹配的记录</p>
+                    <p>${dynamicI18n[lang].no_matching_records}</p>
                 </div>
             `;
             updatePaginationControls(0);
@@ -672,7 +771,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cell === null || cell === undefined) {
                     cellDisplay = '<span style="color:var(--text-dim);font-style:italic">null</span>';
                 } else if (typeof cell === 'boolean') {
-                    cellDisplay = cell ? '是' : '否';
+                    cellDisplay = cell ? dynamicI18n[lang].yes : dynamicI18n[lang].no;
                 }
                 tableHtml += `<td title="${String(cell || '')}">${cellDisplay}</td>`;
             });
@@ -696,8 +795,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalPages = Math.ceil(totalRows / appState.pageSize) || 1;
         const startIdx = totalRows === 0 ? 0 : (appState.currentPage - 1) * appState.pageSize + 1;
         const endIdx = Math.min(appState.currentPage * appState.pageSize, totalRows);
-
-        let paginationHtml = `显示第 ${startIdx} - ${endIdx} 条，共 ${totalRows} 条数据`;
+        const lang = localStorage.getItem('pref_lang') || 'zh';
+        let paginationHtml = dynamicI18n[lang].showing_rows(startIdx, endIdx, totalRows);
         
         if (totalPages > 1) {
             paginationHtml += `
@@ -841,12 +940,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const xField = elements.chartXSelect.value;
         const yField = elements.chartYSelect.value;
         
+        const lang = localStorage.getItem('pref_lang') || 'zh';
         if (!xField || !yField) {
-            showError('生成图表需要同时指定 X 轴和 Y 轴字段。');
+            showError(dynamicI18n[lang].chart_error_fields);
             return;
         }
         
-        renderChart(chartType, xField, yField, `${xField} 与 ${yField} 关系图表`);
+        renderChart(chartType, xField, yField, dynamicI18n[lang].custom_chart_title(xField, yField));
     }
 
     function renderChart(type, xField, yField, title) {
@@ -1003,4 +1103,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function hideError() {
         elements.errorToast.classList.remove('show');
     }
+
+    // Listen for language changes from storage event
+    window.addEventListener('storage', () => {
+        renderPresets();
+        if (appState.queryResult && appState.queryResult.columns && appState.queryResult.columns.length > 0) {
+            renderResultView();
+        }
+    });
 });

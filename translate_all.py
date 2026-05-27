@@ -314,22 +314,66 @@ def write_html_report(user_comments):
             border-radius: 12px;
             color: var(--text-muted);
         }
+
+        /* Language Switcher Styling */
+        .lang-selector-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background: rgba(18, 20, 32, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 6px 12px;
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        }
+        .lang-selector-container i {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .lang-selector-container select {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 12.5px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .lang-selector-container select option {
+            background: #121420;
+            color: var(--text-main);
+        }
     </style>
 </head>
 <body>
+    <!-- Float Language Selector -->
+    <div class="lang-selector-container">
+        <i class="fas fa-globe"></i>
+        <select id="lang-select">
+            <option value="zh">简体中文</option>
+            <option value="ko">한국어</option>
+        </select>
+    </div>
+
     <div class="container">
         <!-- Top controls header -->
         <header>
-            <h1><i class="fas fa-comments"></i> 用户发言记录及中文翻译</h1>
+            <h1 id="header-title"><i class="fas fa-comments"></i> 用户发言记录及中文翻译</h1>
             <div class="controls">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" id="user-search" placeholder="搜索用户ID或发言关键词...">
                 </div>
                 <div class="pagination-container">
-                    <button class="btn-page btn-prev" disabled><i class="fas fa-chevron-left"></i> 上一页</button>
-                    <span class="page-num">第 1 / 1 页</span>
-                    <button class="btn-page btn-next" disabled>下一页 <i class="fas fa-chevron-right"></i></button>
+                    <button class="btn-page btn-prev" disabled></button>
+                    <span class="page-num"></span>
+                    <button class="btn-page btn-next" disabled></button>
                 </div>
             </div>
         </header>
@@ -369,7 +413,35 @@ def write_html_report(user_comments):
             pagesNum: document.querySelectorAll('.page-num')
         };
 
-        // Generate a deterministic dark pastel background color from User ID string
+        const i18n = {
+            zh: {
+                title_page: '用户直播发言记录及翻译报告',
+                title_header: '<i class="fas fa-comments"></i> 用户发言记录及中文翻译',
+                search_placeholder: '搜索用户ID或发言关键词...',
+                prev_btn: '<i class="fas fa-chevron-left"></i> 上一页',
+                next_btn: '下一页 <i class="fas fa-chevron-right"></i>',
+                table_time: '时间',
+                table_orig: '原文',
+                table_trans: '中文翻译',
+                empty_state: '未找到匹配的用户或发言记录',
+                comments_suffix: '条发言',
+                page_info: (current, total, count) => `第 ${current} / ${total} 页 (共 ${count} 个用户)`
+            },
+            ko: {
+                title_page: '사용자 라이브 발언 기록 및 번역 보고서',
+                title_header: '<i class="fas fa-comments"></i> 사용자 발언 기록 및 중국어 번역',
+                search_placeholder: '사용자 ID 또는 발언 키워드 검색...',
+                prev_btn: '<i class="fas fa-chevron-left"></i> 이전 페이지',
+                next_btn: '다음 페이지 <i class="fas fa-chevron-right"></i>',
+                table_time: '시간',
+                table_orig: '원문',
+                table_trans: '중국어 번역',
+                empty_state: '일치하는 사용자 또는 발언 기록을 찾을 수 없습니다',
+                comments_suffix: '개 발언',
+                page_info: (current, total, count) => `${current} / ${total} 페이지 (총 ${count}명 사용자)`
+            }
+        };
+
         function getUserBgColor(userId) {
             let hash = 0;
             for (let i = 0; i < userId.length; i++) {
@@ -381,17 +453,18 @@ def write_html_report(user_comments):
 
         function renderPage() {
             elements.container.innerHTML = '';
+            const lang = localStorage.getItem('pref_lang') || 'zh';
             
             if (filteredUserIds.length === 0) {
                 elements.container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-search" style="font-size: 32px; margin-bottom: 12px; display: block; opacity: 0.5;"></i>
-                        <p>未找到匹配的用户或发言记录</p>
+                        <p>${i18n[lang].empty_state}</p>
                     </div>
                 `;
                 elements.btnsPrev.forEach(btn => btn.disabled = true);
                 elements.btnsNext.forEach(btn => btn.disabled = true);
-                elements.pagesNum.forEach(el => el.textContent = '第 0 / 0 页');
+                elements.pagesNum.forEach(el => el.textContent = i18n[lang].page_info(0, 0, 0));
                 return;
             }
 
@@ -416,14 +489,14 @@ def write_html_report(user_comments):
                 let blockHtml = `
                     <div class="user-header">
                         <span class="user-id"><i class="fas fa-user-circle"></i> ${userId}</span>
-                        <span class="comment-count">${comments.length} 条发言</span>
+                        <span class="comment-count">${comments.length} ${i18n[lang].comments_suffix}</span>
                     </div>
                     <table class="comments-table">
                         <thead>
                             <tr>
-                                <th class="time-col">时间</th>
-                                <th class="orig-col">原文</th>
-                                <th class="trans-col">中文翻译</th>
+                                <th class="time-col">${i18n[lang].table_time}</th>
+                                <th class="orig-col">${i18n[lang].table_orig}</th>
+                                <th class="trans-col">${i18n[lang].table_trans}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -449,7 +522,7 @@ def write_html_report(user_comments):
             });
 
             // Update pagination buttons status
-            const paginationText = `第 ${currentPage} / ${totalPages} 页 (共 ${filteredUserIds.length} 个用户)`;
+            const paginationText = i18n[lang].page_info(currentPage, totalPages, filteredUserIds.length);
             elements.pagesNum.forEach(el => el.textContent = paginationText);
             
             elements.btnsPrev.forEach(btn => btn.disabled = currentPage === 1);
@@ -485,6 +558,16 @@ def write_html_report(user_comments):
                 .replace(/'/g, "&#039;");
         }
 
+        function updateLanguage(lang) {
+            document.title = i18n[lang].title_page;
+            document.getElementById('header-title').innerHTML = i18n[lang].title_header;
+            elements.search.setAttribute('placeholder', i18n[lang].search_placeholder);
+            elements.btnsPrev.forEach(btn => btn.innerHTML = i18n[lang].prev_btn);
+            elements.btnsNext.forEach(btn => btn.innerHTML = i18n[lang].next_btn);
+            localStorage.setItem('pref_lang', lang);
+            renderPage();
+        }
+
         // Event listeners
         elements.search.addEventListener('input', handleSearch);
         
@@ -509,8 +592,25 @@ def write_html_report(user_comments):
             });
         });
 
-        // Initial Load
-        renderPage();
+        // Setup dropdown
+        const savedLang = localStorage.getItem('pref_lang') || 'zh';
+        const langSelect = document.getElementById('lang-select');
+        langSelect.value = savedLang;
+        updateLanguage(savedLang);
+
+        langSelect.addEventListener('change', (e) => {
+            updateLanguage(e.target.value);
+            window.dispatchEvent(new Event('storage'));
+        });
+
+        // Listen for language change in other tabs
+        window.addEventListener('storage', () => {
+            const currentLang = localStorage.getItem('pref_lang') || 'zh';
+            if (langSelect.value !== currentLang) {
+                langSelect.value = currentLang;
+                updateLanguage(currentLang);
+            }
+        });
     </script>
 </body>
 </html>

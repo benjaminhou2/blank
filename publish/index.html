@@ -186,13 +186,57 @@
             margin-top: 20px;
             letter-spacing: 0.5px;
         }
+
+        /* Language Switcher Styling */
+        .lang-selector-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background: rgba(18, 20, 32, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 6px 12px;
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        }
+        .lang-selector-container i {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .lang-selector-container select {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 12.5px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .lang-selector-container select option {
+            background: #121420;
+            color: var(--text-main);
+        }
     </style>
 </head>
 <body>
+    <!-- Float Language Selector -->
+    <div class="lang-selector-container">
+        <i class="fas fa-globe"></i>
+        <select id="lang-select">
+            <option value="zh">简体中文</option>
+            <option value="ko">한국어</option>
+        </select>
+    </div>
+
     <div class="portal-wrapper">
         <header>
-            <h1><i class="fas fa-cubes"></i> Blank-S9 直播数据分析中心</h1>
-            <p>选择下方的分析看板或专用翻译发言报告，快速开始您的直播互动数据分析与透视。</p>
+            <h1 data-i18n="title"><i class="fas fa-cubes"></i> Blank-S9 直播数据分析中心</h1>
+            <p data-i18n="subtitle">选择下方的分析看板或专用翻译发言报告，快速开始您的直播互动数据分析与透视。</p>
         </header>
 
         <div class="portal-grid">
@@ -203,8 +247,8 @@
                     <div class="arrow"><i class="fas fa-arrow-right"></i></div>
                 </div>
                 <div class="card-body">
-                    <h2>交互式 SQL 数据分析看板</h2>
-                    <p>编写 SQL 语句或通过 AI 智能助手进行交互式查询。支持直连 DuckDB 数据库，自动渲染柱状图、折线图、饼图等可视化图表，并集成分析模板模板。</p>
+                    <h2 data-i18n="card_dash_title">交互式 SQL 数据分析看板</h2>
+                    <p data-i18n="card_dash_desc">编写 SQL 语句或通过 AI 智能助手进行交互式查询。支持直连 DuckDB 数据库，自动渲染柱状图、折线图、饼图等可视化图表，并集成分析模板模板。</p>
                 </div>
             </a>
 
@@ -215,8 +259,8 @@
                     <div class="arrow"><i class="fas fa-arrow-right"></i></div>
                 </div>
                 <div class="card-body">
-                    <h2>完整发言中文翻译报告</h2>
-                    <p>汇总当前直播所有的发言记录，提供高精度 Simplified Chinese（中文翻译）对照，以用户数为主键进行分页展示（每页 50 个用户），支持全文模糊检索。</p>
+                    <h2 data-i18n="card_all_title">完整发言中文翻译报告</h2>
+                    <p data-i18n="card_all_desc">汇总当前直播所有的发言记录，提供高精度 Simplified Chinese（中文翻译）对照，以用户数为主键进行分页展示（每页 50 个用户），支持全文模糊检索。</p>
                 </div>
             </a>
 
@@ -227,8 +271,8 @@
                     <div class="arrow"><i class="fas fa-arrow-right"></i></div>
                 </div>
                 <div class="card-body">
-                    <h2>已关注用户发言记录报告</h2>
-                    <p>聚焦于有关注行为的优质转化用户，按用户的关注时间从早到晚进行主列表排序。发言记录依时间正序排列，已过滤纯数字/纯符号的冗余弹幕。</p>
+                    <h2 data-i18n="card_follow_title">已关注用户发言记录报告</h2>
+                    <p data-i18n="card_follow_desc">聚焦于有关注行为的优质转化用户，按用户的关注时间从早到晚进行主列表排序。发言记录依时间正序排列，已过滤纯数字/纯符号的冗余弹幕。</p>
                 </div>
             </a>
 
@@ -239,8 +283,8 @@
                     <div class="arrow"><i class="fas fa-arrow-right"></i></div>
                 </div>
                 <div class="card-body">
-                    <h2>打赏用户发言记录报告</h2>
-                    <p>专门聚焦打赏大户。主列表按用户打赏总金额降序（高到低）进行实力排行，头部并列显示是否关注、累计打赏金额及首次打赏时间，发言内容为过滤后的正序集合。</p>
+                    <h2 data-i18n="card_spend_title">打赏用户发言记录报告</h2>
+                    <p data-i18n="card_spend_desc">专门聚焦打赏大户。主列表按用户打赏总金额降序（高到低）进行实力排行，头部并列显示是否关注、累计打赏金额及首次打赏时间，发言内容为过滤后的正序集合。</p>
                 </div>
             </a>
 
@@ -251,15 +295,82 @@
                     <div class="arrow"><i class="fas fa-arrow-right"></i></div>
                 </div>
                 <div class="card-body">
-                    <h2>打赏用户清单排行榜</h2>
-                    <p>汇总所有有打赏记录的用户，按打赏总金额降序（高到低）排序。清晰展示用户 ID、是否关注、关注时间、累计打赏金额、首次打赏时间及发言总条数。</p>
+                    <h2 data-i18n="card_list_title">打赏用户清单排行榜</h2>
+                    <p data-i18n="card_list_desc">汇总所有有打赏记录的用户，按打赏总金额降序（高到低）排序。清晰展示用户 ID、是否关注、关注时间、累计打赏金额、首次打赏时间及发言总条数。</p>
                 </div>
             </a>
         </div>
 
         <footer>
-            <p>Blank-S9 LIVESTREAM INTELLIGENT ANALYZER &copy; 2026</p>
+            <p data-i18n="footer">Blank-S9 LIVESTREAM INTELLIGENT ANALYZER &copy; 2026</p>
         </footer>
     </div>
+
+    <!-- Localization Script -->
+    <script>
+        const i18n = {
+            zh: {
+                title: '<i class="fas fa-cubes"></i> Blank-S9 直播数据分析中心',
+                subtitle: '选择下方的分析看板或专用翻译发言报告，快速开始您的直播互动数据分析与透视。',
+                card_dash_title: '交互式 SQL 数据分析看板',
+                card_dash_desc: '编写 SQL 语句或通过 AI 智能助手进行交互式查询。支持直连 DuckDB 数据库，自动渲染柱状图、折线图、饼图等可视化图表，并集成分析模板模板。',
+                card_all_title: '完整发言中文翻译报告',
+                card_all_desc: '汇总当前直播所有的发言记录，提供高精度 Simplified Chinese（中文翻译）对照，以用户数为主键进行分页展示（每页 50 个用户），支持全文模糊检索。',
+                card_follow_title: '已关注用户发言记录报告',
+                card_follow_desc: '聚焦于有关注行为的优质转化用户，按用户的关注时间从早到晚进行主列表排序。发言记录依时间正序排列，已过滤纯数字/纯符号的冗余弹幕。',
+                card_spend_title: '打赏用户发言记录报告',
+                card_spend_desc: '专门聚焦打赏大户。主列表按用户打赏总金额降序（高到低）进行实力排行，头部并列显示是否关注、累计打赏金额及首次打赏时间，发言内容为过滤后的正序集合。',
+                card_list_title: '打赏用户清单排行榜',
+                card_list_desc: '汇总所有有打赏记录的用户，按打赏总金额降序（高到低）排序。清晰展示用户 ID、是否关注、关注时间、累计打赏金额、首次打赏时间及发言总条数。',
+                footer: 'Blank-S9 LIVESTREAM INTELLIGENT ANALYZER &copy; 2026'
+            },
+            ko: {
+                title: '<i class="fas fa-cubes"></i> Blank-S9 라이브스트림 데이터 분석 센터',
+                subtitle: '아래의 분석 대시보드 또는 전용 번역 발언 보고서를 선택하여 라이브스트림 상호작용 데이터 분석 및 인사이트를 빠르게 시작하세요.',
+                card_dash_title: '대화형 SQL 데이터 분석 대시보드',
+                card_dash_desc: 'SQL 쿼리를 작성하거나 AI 스마트 어시스턴트를 통해 대화형 조회를 수행합니다. DuckDB 데이터베이스에 직접 연결하며, 막대형, 꺾은선형, 원형 등 시각화 차트를 자동 렌더링하고 분석 템플릿을 통합합니다.',
+                card_all_title: '전체 발언 중국어 번역 보고서',
+                card_all_desc: '현재 라이브 스트림의 모든 발언 기록을 요약하고 고정밀 간체 중국어 번역 대조를 제공하며, 사용자 수를 기본 키로 페이지를 나누어 표시(페이지당 50명)하고 전체 텍스트 모호 검색을 지원합니다.',
+                card_follow_title: '팔로우 사용자 발언 기록 보고서',
+                card_follow_desc: '팔로우 행동을 취한 우수 전환 사용자에 초점을 맞추어 사용자의 팔로우 시간순(이른 순에서 늦은 순)으로 메인 목록을 정렬합니다. 발언 기록은 시간 순서대로 정렬되며, 순수 숫자/순수 기호의 중복 탄막은 필터링됩니다.',
+                card_spend_title: '후원 사용자 발언 기록 보고서',
+                card_spend_desc: '후원 우수 사용자에 특별히 초점을 맞춥니다. 메인 목록은 사용자의 총 후원 금액 내림차순(높은 순에서 낮은 순)으로 정렬되며, 헤더에는 팔로우 여부, 누적 후원 금액 및 최초 후원 시간이 병렬로 표시되고 발언 내용은 필터링된 시간 순서 집합입니다.',
+                card_list_title: '후원 사용자 목록 랭킹',
+                card_list_desc: '후원 기록이 있는 모든 사용자를 요약하고 총 후원 금액 내림차순(높은 순에서 낮은 순)으로 정렬합니다. 사용자 ID, 팔로우 여부, 팔로우 시간, 누적 후원 금액, 최초 후원 시간 및 총 발언 수를 명확하게 표시합니다.',
+                footer: 'Blank-S9 라이브스트림 지능형 분석기 &copy; 2026'
+            }
+        };
+
+        function updateLanguage(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang] && i18n[lang][key]) {
+                    el.innerHTML = i18n[lang][key];
+                }
+            });
+            document.title = lang === 'zh' ? 'Blank-S9 直播数据分析中心' : 'Blank-S9 라이브스트림 데이터 분석 센터';
+            localStorage.setItem('pref_lang', lang);
+        }
+
+        const savedLang = localStorage.getItem('pref_lang') || 'zh';
+        const langSelect = document.getElementById('lang-select');
+        langSelect.value = savedLang;
+        updateLanguage(savedLang);
+
+        langSelect.addEventListener('change', (e) => {
+            updateLanguage(e.target.value);
+            // Broadcast change to other tabs if open
+            window.dispatchEvent(new Event('storage'));
+        });
+
+        // Listen for language change in other tabs
+        window.addEventListener('storage', () => {
+            const currentLang = localStorage.getItem('pref_lang') || 'zh';
+            if (langSelect.value !== currentLang) {
+                langSelect.value = currentLang;
+                updateLanguage(currentLang);
+            }
+        });
+    </script>
 </body>
 </html>

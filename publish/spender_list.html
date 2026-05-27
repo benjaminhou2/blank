@@ -221,22 +221,66 @@
             text-align: center;
             color: var(--text-muted);
         }
+
+        /* Language Switcher Styling */
+        .lang-selector-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background: rgba(18, 20, 32, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 6px 12px;
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        }
+        .lang-selector-container i {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .lang-selector-container select {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 12.5px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .lang-selector-container select option {
+            background: #121420;
+            color: var(--text-main);
+        }
     </style>
 </head>
 <body>
+    <!-- Float Language Selector -->
+    <div class="lang-selector-container">
+        <i class="fas fa-globe"></i>
+        <select id="lang-select">
+            <option value="zh">简体中文</option>
+            <option value="ko">한국어</option>
+        </select>
+    </div>
+
     <div class="container">
         <!-- Top controls header -->
         <header>
-            <h1><i class="fas fa-trophy"></i> 打赏用户清单排行榜</h1>
+            <h1 id="header-title"><i class="fas fa-trophy"></i> 打赏用户清单排行榜</h1>
             <div class="controls">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" id="user-search" placeholder="搜索用户ID、关注状态（是/否）...">
                 </div>
                 <div class="pagination-container">
-                    <button class="btn-page btn-prev" disabled><i class="fas fa-chevron-left"></i> 上一页</button>
-                    <span class="page-num">第 1 / 1 页</span>
-                    <button class="btn-page btn-next" disabled>下一页 <i class="fas fa-chevron-right"></i></button>
+                    <button class="btn-page btn-prev" disabled></button>
+                    <span class="page-num"></span>
+                    <button class="btn-page btn-next" disabled></button>
                 </div>
             </div>
         </header>
@@ -316,6 +360,55 @@
             pagesNum: document.querySelectorAll('.page-num')
         };
 
+        const i18n = {
+            zh: {
+                title_page: '打赏用户清单排行榜',
+                title_header: '<i class="fas fa-trophy"></i> 打赏用户清单排行榜',
+                search_placeholder: '搜索用户ID、关注状态（是/否）...',
+                prev_btn: '<i class="fas fa-chevron-left"></i> 上一页',
+                next_btn: '下一页 <i class="fas fa-chevron-right"></i>',
+                stat_total_spenders: '打赏用户总数',
+                stat_high_value: '高额打赏用户数 (≥ $100)',
+                stat_total_gift: '打赏总金额',
+                stat_active_spenders: '活跃打赏人数 (有发言)',
+                th_rank: '排行',
+                th_user: '用户 ID',
+                th_is_follower: '是否关注',
+                th_follow_time: '关注直播间的时间',
+                th_gift_amount: '累计打赏金额 (USD)',
+                th_first_gift: '首次打赏时间',
+                th_comments: '发言条数',
+                badge_yes: '是',
+                badge_no: '否',
+                comments_suffix: ' 条',
+                empty_state: '未找到匹配的打赏用户记录',
+                page_info: (current, total, count) => `第 ${current} / ${total} 页 (共 ${count} 个打赏用户)`
+            },
+            ko: {
+                title_page: '후원 사용자 목록 랭킹',
+                title_header: '<i class="fas fa-trophy"></i> 후원 사용자 목록 랭킹',
+                search_placeholder: '사용자 ID, 팔로우 상태(예/아니오) 검색...',
+                prev_btn: '<i class="fas fa-chevron-left"></i> 이전 페이지',
+                next_btn: '다음 페이지 <i class="fas fa-chevron-right"></i>',
+                stat_total_spenders: '총 후원 사용자 수',
+                stat_high_value: '고액 후원 사용자 수 (≥ $100)',
+                stat_total_gift: '총 후원 금액',
+                stat_active_spenders: '활성 후원자 수 (발언 있음)',
+                th_rank: '순위',
+                th_user: '사용자 ID',
+                th_is_follower: '팔로우 여부',
+                th_follow_time: '라이브 스트림 팔로우 시간',
+                th_gift_amount: '누적 후원 금액 (USD)',
+                th_first_gift: '최초 후원 시간',
+                th_comments: '발언 수',
+                badge_yes: '예',
+                badge_no: '아니오',
+                comments_suffix: ' 개',
+                empty_state: '일치하는 후원 사용자 기록을 찾을 수 없습니다',
+                page_info: (current, total, count) => `${current} / ${total} 페이지 (총 ${count}명 후원 사용자)`
+            }
+        };
+
         function getRankClass(rank) {
             if (rank === 1) return 'rank-gold';
             if (rank === 2) return 'rank-silver';
@@ -325,12 +418,17 @@
 
         function renderPage() {
             elements.tbody.innerHTML = '';
+            const lang = localStorage.getItem('pref_lang') || 'zh';
             
             if (filteredUsers.length === 0) {
+                elements.empty.innerHTML = `
+                    <i class="fas fa-search" style="font-size: 36px; margin-bottom: 12px; display: block; opacity: 0.5; color: var(--primary);"></i>
+                    <p>${i18n[lang].empty_state}</p>
+                `;
                 elements.empty.style.display = 'block';
                 elements.btnsPrev.forEach(btn => btn.disabled = true);
                 elements.btnsNext.forEach(btn => btn.disabled = true);
-                elements.pagesNum.forEach(el => el.textContent = '第 0 / 0 页');
+                elements.pagesNum.forEach(el => el.textContent = i18n[lang].page_info(0, 0, 0));
                 return;
             }
             elements.empty.style.display = 'none';
@@ -347,6 +445,7 @@
                 const tr = document.createElement('tr');
                 
                 const rankClass = getRankClass(user.index);
+                const isFollowerTrans = user.is_follower === '是' ? i18n[lang].badge_yes : i18n[lang].badge_no;
                 const followClass = user.is_follower === '是' ? 'yes' : 'no';
                 
                 tr.innerHTML = `
@@ -358,17 +457,17 @@
                         </div>
                     </td>
                     <td>
-                        <span class="badge ${followClass}">${user.is_follower}</span>
+                        <span class="badge ${followClass}">${isFollowerTrans}</span>
                     </td>
                     <td class="time-col">${user.follow_time}</td>
                     <td class="amount-col">$${user.total_gift_amount.toFixed(2)}</td>
                     <td class="time-col">${user.first_gift_time}</td>
-                    <td class="count-col">${user.comment_count} 条</td>
+                    <td class="count-col">${user.comment_count}${i18n[lang].comments_suffix}</td>
                 `;
                 elements.tbody.appendChild(tr);
             });
 
-            const paginationText = `第 ${currentPage} / ${totalPages} 页 (共 ${filteredUsers.length} 个打赏用户)`;
+            const paginationText = i18n[lang].page_info(currentPage, totalPages, filteredUsers.length);
             elements.pagesNum.forEach(el => el.textContent = paginationText);
             
             elements.btnsPrev.forEach(btn => btn.disabled = currentPage === 1);
@@ -377,6 +476,7 @@
 
         function handleSearch() {
             const query = elements.search.value.trim().toLowerCase();
+            const lang = localStorage.getItem('pref_lang') || 'zh';
             
             if (!query) {
                 filteredUsers = [...commentData];
@@ -385,13 +485,45 @@
                     const matchUser = user.user_id.toLowerCase().includes(query) || 
                                       user.index.toString() === query ||
                                       ("关注: " + user.is_follower).toLowerCase().includes(query) ||
-                                      (query === "关注" && user.is_follower === "是") ||
-                                      (query === "未关注" && user.is_follower === "否");
+                                      ((query === "关注" || query === "팔로우" || query === "예") && user.is_follower === "是") ||
+                                      ((query === "未关注" || query === "미팔로우" || query === "아니오") && user.is_follower === "否");
                     return matchUser;
                 });
             }
             
             currentPage = 1;
+            renderPage();
+        }
+
+        function updateLanguage(lang) {
+            document.title = i18n[lang].title_page;
+            document.getElementById('header-title').innerHTML = i18n[lang].title_header;
+            elements.search.setAttribute('placeholder', i18n[lang].search_placeholder);
+            elements.btnsPrev.forEach(btn => btn.innerHTML = i18n[lang].prev_btn);
+            elements.btnsNext.forEach(btn => btn.innerHTML = i18n[lang].next_btn);
+            
+            // Stats labels
+            const labels = document.querySelectorAll('.stat-card .label');
+            if (labels.length >= 4) {
+                labels[0].textContent = i18n[lang].stat_total_spenders;
+                labels[1].textContent = i18n[lang].stat_high_value;
+                labels[2].textContent = i18n[lang].stat_total_gift;
+                labels[3].textContent = i18n[lang].stat_active_spenders;
+            }
+            
+            // Table headers
+            const ths = document.querySelectorAll('.spender-table th');
+            if (ths.length >= 7) {
+                ths[0].textContent = i18n[lang].th_rank;
+                ths[1].textContent = i18n[lang].th_user;
+                ths[2].textContent = i18n[lang].th_is_follower;
+                ths[3].textContent = i18n[lang].th_follow_time;
+                ths[4].textContent = i18n[lang].th_gift_amount;
+                ths[5].textContent = i18n[lang].th_first_gift;
+                ths[6].textContent = i18n[lang].th_comments;
+            }
+            
+            localStorage.setItem('pref_lang', lang);
             renderPage();
         }
 
@@ -416,6 +548,26 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
+        });
+
+        // Setup dropdown
+        const savedLang = localStorage.getItem('pref_lang') || 'zh';
+        const langSelect = document.getElementById('lang-select');
+        langSelect.value = savedLang;
+        updateLanguage(savedLang);
+
+        langSelect.addEventListener('change', (e) => {
+            updateLanguage(e.target.value);
+            window.dispatchEvent(new Event('storage'));
+        });
+
+        // Listen for language change in other tabs
+        window.addEventListener('storage', () => {
+            const currentLang = localStorage.getItem('pref_lang') || 'zh';
+            if (langSelect.value !== currentLang) {
+                langSelect.value = currentLang;
+                updateLanguage(currentLang);
+            }
         });
 
         renderPage();

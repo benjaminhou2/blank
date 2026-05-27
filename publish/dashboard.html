@@ -13,8 +13,60 @@
     <!-- ECharts CDN -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Language Switcher Styling */
+        .lang-selector-container {
+            position: fixed;
+            top: 15px;
+            right: 20px;
+            z-index: 9999;
+            background: rgba(18, 20, 32, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 5px 10px;
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+        }
+        .lang-selector-container i {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+        .lang-selector-container select {
+            background: transparent;
+            border: none;
+            color: #f3f4f6;
+            font-size: 12px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .lang-selector-container select option {
+            background: #121420;
+            color: #f3f4f6;
+        }
+        
+        /* Adjust top header padding on the right to make room for float select on desktop if needed */
+        @media (min-width: 801px) {
+            .quick-stats {
+                margin-right: 120px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Float Language Selector -->
+    <div class="lang-selector-container">
+        <i class="fas fa-globe"></i>
+        <select id="lang-select">
+            <option value="zh">简体中文</option>
+            <option value="ko">한국어</option>
+        </select>
+    </div>
+
     <div class="mesh-background"></div>
 
     <div class="app-container">
@@ -24,16 +76,16 @@
                 <span class="icon">📊</span>
                 <div class="logo-text">
                     <h1>Blank-S9</h1>
-                    <p>直播数据分析看板</p>
+                    <p data-i18n="logo_sub">直播数据分析看板</p>
                 </div>
             </div>
 
             <!-- Sidebar Navigation Tabs -->
             <div class="sidebar-tabs">
-                <button class="s-tab-btn active" data-stab="stab-schema">
+                <button class="s-tab-btn active" data-stab="stab-schema" data-i18n="tab_schema">
                     <i class="fas fa-database"></i> 结构 & 模板
                 </button>
-                <button class="s-tab-btn" data-stab="stab-ai" id="s-tab-ai-btn">
+                <button class="s-tab-btn" data-stab="stab-ai" id="s-tab-ai-btn" data-i18n="tab_ai">
                     <i class="fas fa-robot"></i> AI 智能助手
                 </button>
             </div>
@@ -42,17 +94,17 @@
             <div class="s-tab-content active" id="stab-schema">
                 <!-- Database Schema Section -->
                 <div class="sidebar-section">
-                    <h2><i class="fas fa-project-diagram"></i> 数据库结构 (Schema)</h2>
+                    <h2 data-i18n="schema_title"><i class="fas fa-project-diagram"></i> 数据库结构 (Schema)</h2>
                     <div id="schema-container" class="schema-list">
-                        <div class="loading-small">加载结构中...</div>
+                        <div class="loading-small" data-i18n="schema_loading">加载结构中...</div>
                     </div>
                 </div>
 
                 <!-- Query Presets Section -->
                 <div class="sidebar-section" style="margin-top: 20px;">
-                    <h2><i class="fas fa-magic"></i> 预设分析模板 (Presets)</h2>
+                    <h2 data-i18n="presets_title"><i class="fas fa-magic"></i> 预设分析模板 (Presets)</h2>
                     <div id="presets-container" class="presets-list">
-                        <div class="loading-small">加载预设中...</div>
+                        <div class="loading-small" data-i18n="presets_loading">加载预设中...</div>
                     </div>
                 </div>
             </div>
@@ -61,19 +113,19 @@
             <div class="s-tab-content" id="stab-ai">
                 <div class="chat-container">
                     <div class="chat-header">
-                        <span class="status-indicator"><i class="fas fa-circle text-success"></i> DeepSeek AI 引擎</span>
+                        <span class="status-indicator"><i class="fas fa-circle text-success"></i> <span data-i18n="chat_header">DeepSeek AI 引擎</span></span>
                     </div>
                     <div class="chat-messages" id="chat-messages">
                         <div class="chat-bubble ai">
-                            <p>你好！我是您的 DeepSeek 智能分析助手。您可以直接用自然语言向我提问。</p>
-                            <p class="chat-tip">💡 试着问我：<br>
+                            <p data-i18n="ai_intro">你好！我是您的 DeepSeek 智能分析助手。您可以直接用自然语言向我提问。</p>
+                            <p class="chat-tip" data-i18n="chat_tip">💡 试着问我：<br>
                             - “有几个直播间？”<br>
                             - “哪个用户的打赏金额最高？”<br>
                             - “统计每天的总打赏金额，按时间降序”</p>
                         </div>
                     </div>
                     <div class="chat-input-wrapper">
-                        <textarea id="chat-input" placeholder="按 Enter 发送，Shift+Enter 换行..." rows="1"></textarea>
+                        <textarea id="chat-input" placeholder="按 Enter 发送，Shift+Enter 换行..." rows="1" data-i18n-placeholder="chat_placeholder"></textarea>
                         <button id="btn-chat-send" class="btn btn-primary" title="发送 (Enter)">
                             <i class="fas fa-paper-plane"></i>
                         </button>
@@ -87,24 +139,24 @@
             <!-- Header Summary Metrics -->
             <header class="top-header glass-panel">
                 <div class="header-title">
-                    <h2>控制台 & 数据分析</h2>
-                    <p>编写 SQL 语句或通过 AI 助手进行交互式查询</p>
+                    <h2 data-i18n="main_title">控制台 & 数据分析</h2>
+                    <p data-i18n="main_subtitle">编写 SQL 语句或通过 AI 助手进行交互式查询</p>
                 </div>
                 <div class="quick-stats" id="quick-stats-panel">
                     <div class="stat-card">
-                        <span class="stat-label">数据表总数</span>
+                        <span class="stat-label" data-i18n="stat_tables">数据表总数</span>
                         <span class="stat-val">3</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label">数据行数 (rooms)</span>
+                        <span class="stat-label" data-i18n="stat_rooms">数据行数 (rooms)</span>
                         <span class="stat-val">67</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label">送礼总频次</span>
+                        <span class="stat-label" data-i18n="stat_gifts">送礼总频次</span>
                         <span class="stat-val">47.3K</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label">发言总弹幕</span>
+                        <span class="stat-label" data-i18n="stat_comments">发言总弹幕</span>
                         <span class="stat-val">253.6K</span>
                     </div>
                 </div>
@@ -113,11 +165,11 @@
             <!-- SQL Editor Section -->
             <section class="editor-section glass-panel">
                 <div class="section-header">
-                    <h3><i class="fas fa-code"></i> SQL 编辑器 <span id="ai-active-indicator" class="badge-ai" style="display:none">AI 生成</span></h3>
+                    <h3><i class="fas fa-code"></i> <span data-i18n="editor_title">SQL 编辑器</span> <span id="ai-active-indicator" class="badge-ai" style="display:none" data-i18n="ai_badge">AI 生成</span></h3>
                     <div class="editor-actions">
-                        <button id="btn-format" class="btn btn-secondary" title="格式化 SQL (快捷键: Alt+F)"><i class="fas fa-align-left"></i> 格式化</button>
-                        <button id="btn-clear" class="btn btn-secondary"><i class="fas fa-trash-alt"></i> 清空</button>
-                        <button id="btn-run" class="btn btn-primary" title="执行查询 (快捷键: Cmd/Ctrl+Enter)"><i class="fas fa-play"></i> 执行查询</button>
+                        <button id="btn-format" class="btn btn-secondary" title="格式化 SQL (快捷键: Alt+F)"><i class="fas fa-align-left"></i> <span data-i18n="btn_format">格式化</span></button>
+                        <button id="btn-clear" class="btn btn-secondary"><i class="fas fa-trash-alt"></i> <span data-i18n="btn_clear">清空</span></button>
+                        <button id="btn-run" class="btn btn-primary" title="执行查询 (快捷键: Cmd/Ctrl+Enter)"><i class="fas fa-play"></i> <span data-i18n="btn_run">执行查询</span></button>
                     </div>
                 </div>
                 <div class="sql-editor-wrapper">
@@ -130,8 +182,8 @@
             <section class="results-section glass-panel" id="results-panel">
                 <div class="results-tabs">
                     <div class="tabs-header">
-                        <button class="tab-btn active" data-tab="tab-table"><i class="fas fa-table"></i> 数据表格</button>
-                        <button class="tab-btn" data-tab="tab-chart" id="tab-chart-btn"><i class="fas fa-chart-bar"></i> 可视化图表</button>
+                        <button class="tab-btn active" data-tab="tab-table"><i class="fas fa-table"></i> <span data-i18n="tab_table_btn">数据表格</span></button>
+                        <button class="tab-btn" data-tab="tab-chart" id="tab-chart-btn"><i class="fas fa-chart-bar"></i> <span data-i18n="tab_chart_btn">可视化图表</span></button>
                     </div>
                     <div class="results-meta" id="results-meta">
                         <!-- Query performance info here -->
@@ -143,7 +195,7 @@
                     <div class="table-toolbar">
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="table-search" placeholder="在当前页检索数据...">
+                            <input type="text" id="table-search" placeholder="在当前页检索数据..." data-i18n-placeholder="table_search_placeholder">
                         </div>
                         <div class="pagination-info" id="pagination-info">
                             <!-- Pagination text -->
@@ -152,7 +204,7 @@
                     <div class="table-wrapper" id="table-wrapper">
                         <div class="empty-state">
                             <span class="empty-icon">📂</span>
-                            <p>输入 SQL，使用预设模板，或在 AI 助手中提问以加载数据</p>
+                            <p data-i18n="table_empty_intro">输入 SQL，使用预设模板，或在 AI 助手中提问以加载数据</p>
                         </div>
                     </div>
                 </div>
@@ -160,29 +212,29 @@
                 <div class="tab-content" id="tab-chart">
                     <div class="chart-controls">
                         <div class="control-group">
-                            <label for="chart-type-select">图表类型</label>
+                            <label for="chart-type-select" data-i18n="chart_type_label">图表类型</label>
                             <select id="chart-type-select">
-                                <option value="bar">柱状图 (Bar Chart)</option>
-                                <option value="line">折线图 (Line Chart)</option>
-                                <option value="pie">饼图 (Pie Chart)</option>
-                                <option value="scatter">散点图 (Scatter Plot)</option>
+                                <option value="bar" data-i18n="chart_opt_bar">柱状图 (Bar Chart)</option>
+                                <option value="line" data-i18n="chart_opt_line">折线图 (Line Chart)</option>
+                                <option value="pie" data-i18n="chart_opt_pie">饼图 (Pie Chart)</option>
+                                <option value="scatter" data-i18n="chart_opt_scatter">散点图 (Scatter Plot)</option>
                             </select>
                         </div>
                         <div class="control-group">
-                            <label for="chart-x-select">X 轴 (类目字段)</label>
+                            <label for="chart-x-select" data-i18n="chart_x_label">X 轴 (类目字段)</label>
                             <select id="chart-x-select"></select>
                         </div>
                         <div class="control-group">
-                            <label for="chart-y-select">Y 轴 (数值字段)</label>
+                            <label for="chart-y-select" data-i18n="chart_y_label">Y 轴 (数值字段)</label>
                             <select id="chart-y-select"></select>
                         </div>
-                        <button id="btn-update-chart" class="btn btn-secondary">更新图表</button>
+                        <button id="btn-update-chart" class="btn btn-secondary" data-i18n="btn_update_chart">更新图表</button>
                     </div>
                     <div class="chart-wrapper">
                         <div id="chart-container"></div>
                         <div class="empty-state" id="chart-empty-state">
                             <span class="empty-icon">📊</span>
-                            <p>请选择 X 轴与 Y 轴字段，并生成图表</p>
+                            <p data-i18n="chart_empty_intro">请选择 X 轴与 Y 轴字段，并生成图表</p>
                         </div>
                     </div>
                 </div>
@@ -194,7 +246,7 @@
     <div id="error-toast" class="toast error-toast">
         <i class="fas fa-exclamation-circle toast-icon"></i>
         <div class="toast-body">
-            <strong class="toast-title">执行失败</strong>
+            <strong class="toast-title" data-i18n="toast_error_title">执行失败</strong>
             <p id="error-message" class="toast-msg">错误信息</p>
         </div>
         <button id="btn-close-toast" class="toast-close">&times;</button>
@@ -202,5 +254,123 @@
 
     <!-- App JS -->
     <script src="app.js"></script>
+
+    <!-- i18n Translation Logic -->
+    <script>
+        const i18n = {
+            zh: {
+                logo_sub: '直播数据分析看板',
+                tab_schema: '<i class="fas fa-database"></i> 结构 & 模板',
+                tab_ai: '<i class="fas fa-robot"></i> AI 智能助手',
+                schema_title: '<i class="fas fa-project-diagram"></i> 数据库结构 (Schema)',
+                schema_loading: '加载结构中...',
+                presets_title: '<i class="fas fa-magic"></i> 预设分析模板 (Presets)',
+                presets_loading: '加载预设中...',
+                chat_header: 'DeepSeek AI 引擎',
+                ai_intro: '你好！我是您的 DeepSeek 智能分析助手。您可以直接用自然语言向我提问。',
+                chat_tip: '💡 试着问我：<br>- “有几个直播间？”<br>- “哪个用户的打赏金额最高？”<br>- “统计每天的总打赏金额，按时间降序”',
+                chat_placeholder: '按 Enter 发送，Shift+Enter 换行...',
+                main_title: '控制台 & 数据分析',
+                main_subtitle: '编写 SQL 语句或通过 AI 助手进行交互式查询',
+                stat_tables: '数据表总数',
+                stat_rooms: '数据行数 (rooms)',
+                stat_gifts: '送礼总频次',
+                stat_comments: '发言总弹幕',
+                editor_title: 'SQL 编辑器',
+                ai_badge: 'AI 生成',
+                btn_format: '格式化',
+                btn_clear: '清空',
+                btn_run: '执行查询',
+                tab_table_btn: '数据表格',
+                tab_chart_btn: '可视化图表',
+                table_search_placeholder: '在当前页检索数据...',
+                table_empty_intro: '输入 SQL，使用预设模板，或在 AI 助手中提问以加载数据',
+                chart_type_label: '图表类型',
+                chart_opt_bar: '柱状图 (Bar Chart)',
+                chart_opt_line: '折线图 (Line Chart)',
+                chart_opt_pie: '饼图 (Pie Chart)',
+                chart_opt_scatter: '散点图 (Scatter Plot)',
+                chart_x_label: 'X 轴 (类目字段)',
+                chart_y_label: 'Y 轴 (数值字段)',
+                btn_update_chart: '更新图表',
+                chart_empty_intro: '请选择 X 轴与 Y 轴字段，并生成图表',
+                toast_error_title: '执行失败'
+            },
+            ko: {
+                logo_sub: '라이브스트림 데이터 분석 대시보드',
+                tab_schema: '<i class="fas fa-database"></i> 구조 & 템플릿',
+                tab_ai: '<i class="fas fa-robot"></i> AI 스마트 어시스턴트',
+                schema_title: '<i class="fas fa-project-diagram"></i> 데이터베이스 구조 (Schema)',
+                schema_loading: '구조 로딩 중...',
+                presets_title: '<i class="fas fa-magic"></i> 프리셋 분석 템플릿 (Presets)',
+                presets_loading: '프리셋 로딩 중...',
+                chat_header: 'DeepSeek AI 엔진',
+                ai_intro: '안녕하세요! 저는 귀하의 DeepSeek 스마트 분석 어시스턴트입니다. 자연어로 직접 질문하실 수 있습니다.',
+                chat_tip: '💡 이렇게 질문해 보세요:<br>- “라이브 스트림 방은 몇 개입니까?”<br>- “어떤 사용자의 후원 금액이 가장 높습니까?”<br>- “매일 총 후원 금액을 통계 내어 시간 내림차순 정렬”',
+                chat_placeholder: 'Enter 키를 눌러 전송, Shift+Enter로 줄바꿈...',
+                main_title: '콘솔 & 데이터 분석',
+                main_subtitle: 'SQL 쿼리를 작성하거나 AI 어시스턴트를 통해 대화형 조회를 수행합니다.',
+                stat_tables: '데이터 테이블 총수',
+                stat_rooms: '데이터 행 수 (rooms)',
+                stat_gifts: '총 선물 횟수',
+                stat_comments: '총 발언 탄막',
+                editor_title: 'SQL 에디터',
+                ai_badge: 'AI 생성',
+                btn_format: '포맷',
+                btn_clear: '비우기',
+                btn_run: '쿼리 실행',
+                tab_table_btn: '데이터 테이블',
+                tab_chart_btn: '시각화 차트',
+                table_search_placeholder: '현재 페이지에서 데이터 검색...',
+                table_empty_intro: '데이터를 로드하려면 SQL을 입력하거나 프리셋 템플릿을 사용하거나 AI 어시스턴트에게 질문하십시오.',
+                chart_type_label: '차트 유형',
+                chart_opt_bar: '막대형 차트 (Bar Chart)',
+                chart_opt_line: '꺾은선형 차트 (Line Chart)',
+                chart_opt_pie: '원형 차트 (Pie Chart)',
+                chart_opt_scatter: '산점도 (Scatter Plot)',
+                chart_x_label: 'X축 (범주 필드)',
+                chart_y_label: 'Y축 (수치 필드)',
+                btn_update_chart: '차트 업데이트',
+                chart_empty_intro: 'X축과 Y축 필드를 선택하고 차트를 생성하십시오.',
+                toast_error_title: '실행 실패'
+            }
+        };
+
+        function updateLanguage(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang] && i18n[lang][key]) {
+                    el.innerHTML = i18n[lang][key];
+                }
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (i18n[lang] && i18n[lang][key]) {
+                    el.setAttribute('placeholder', i18n[lang][key]);
+                }
+            });
+            
+            document.title = lang === 'zh' ? '直播数据分析看板 - Blank-S9 Livestream Analyzer' : '라이브스트림 데이터 분석 대시보드 - Blank-S9 Livestream Analyzer';
+            localStorage.setItem('pref_lang', lang);
+        }
+
+        const savedLang = localStorage.getItem('pref_lang') || 'zh';
+        const langSelect = document.getElementById('lang-select');
+        langSelect.value = savedLang;
+        updateLanguage(savedLang);
+
+        langSelect.addEventListener('change', (e) => {
+            updateLanguage(e.target.value);
+            window.dispatchEvent(new Event('storage'));
+        });
+
+        window.addEventListener('storage', () => {
+            const currentLang = localStorage.getItem('pref_lang') || 'zh';
+            if (langSelect.value !== currentLang) {
+                langSelect.value = currentLang;
+                updateLanguage(currentLang);
+            }
+        });
+    </script>
 </body>
 </html>
