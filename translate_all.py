@@ -161,7 +161,8 @@ def write_html_report(user_comments):
                               radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.06) 0px, transparent 50%);
         }
         .container {
-            max-width: 1200px;
+            width: 100%;
+            max-width: 100%;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -203,6 +204,7 @@ def write_html_report(user_comments):
             color: #fff;
             outline: none;
             font-size: 13px;
+            transition: all 0.2s ease-in-out;
         }
         .search-box input:focus {
             border-color: var(--primary);
@@ -223,6 +225,12 @@ def write_html_report(user_comments):
             color: #fff;
             cursor: pointer;
             font-size: 12px;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-page:hover:not(:disabled) {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 8px var(--primary-glow);
         }
         .btn-page:disabled { opacity: 0.3; cursor: not-allowed; }
         
@@ -241,9 +249,15 @@ def write_html_report(user_comments):
         
         /* Users stream container */
         .users-list {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 16px;
+            width: 100%;
+        }
+        @media (max-width: 950px) {
+            .users-list {
+                grid-template-columns: 1fr;
+            }
         }
         .user-block {
             border-radius: 12px;
@@ -251,6 +265,12 @@ def write_html_report(user_comments):
             overflow: hidden;
             backdrop-filter: blur(8px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .user-block:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
         }
         .user-header {
             padding: 14px 20px;
@@ -385,6 +405,8 @@ def write_html_report(user_comments):
 
             pageUserIds.forEach(userId => {
                 const comments = commentData[userId];
+                // Explicitly sort comments from early to late
+                comments.sort((a, b) => a.t.localeCompare(b.t));
                 const bgColor = getUserBgColor(userId);
                 
                 const block = document.createElement('div');
