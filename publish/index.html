@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直播数据分析看板 - Blank-S9 Livestream Analyzer</title>
+    <!-- Google Fonts Outfit & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="mesh-background"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <span class="icon">📊</span>
+                <div class="logo-text">
+                    <h1>Blank-S9</h1>
+                    <p>直播数据分析看板</p>
+                </div>
+            </div>
+
+            <!-- Sidebar Navigation Tabs -->
+            <div class="sidebar-tabs">
+                <button class="s-tab-btn active" data-stab="stab-schema">
+                    <i class="fas fa-database"></i> 结构 & 模板
+                </button>
+                <button class="s-tab-btn" data-stab="stab-ai" id="s-tab-ai-btn">
+                    <i class="fas fa-robot"></i> AI 智能助手
+                </button>
+            </div>
+
+            <!-- Tab 1: Schema & Presets -->
+            <div class="s-tab-content active" id="stab-schema">
+                <!-- Database Schema Section -->
+                <div class="sidebar-section">
+                    <h2><i class="fas fa-project-diagram"></i> 数据库结构 (Schema)</h2>
+                    <div id="schema-container" class="schema-list">
+                        <div class="loading-small">加载结构中...</div>
+                    </div>
+                </div>
+
+                <!-- Query Presets Section -->
+                <div class="sidebar-section" style="margin-top: 20px;">
+                    <h2><i class="fas fa-magic"></i> 预设分析模板 (Presets)</h2>
+                    <div id="presets-container" class="presets-list">
+                        <div class="loading-small">加载预设中...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: AI Dialog Chat -->
+            <div class="s-tab-content" id="stab-ai">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <span class="status-indicator"><i class="fas fa-circle text-success"></i> DeepSeek AI 引擎</span>
+                    </div>
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-bubble ai">
+                            <p>你好！我是您的 DeepSeek 智能分析助手。您可以直接用自然语言向我提问。</p>
+                            <p class="chat-tip">💡 试着问我：<br>
+                            - “有几个直播间？”<br>
+                            - “哪个用户的打赏金额最高？”<br>
+                            - “统计每天的总打赏金额，按时间降序”</p>
+                        </div>
+                    </div>
+                    <div class="chat-input-wrapper">
+                        <textarea id="chat-input" placeholder="按 Enter 发送，Shift+Enter 换行..." rows="1"></textarea>
+                        <button id="btn-chat-send" class="btn btn-primary" title="发送 (Enter)">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header Summary Metrics -->
+            <header class="top-header glass-panel">
+                <div class="header-title">
+                    <h2>控制台 & 数据分析</h2>
+                    <p>编写 SQL 语句或通过 AI 助手进行交互式查询</p>
+                </div>
+                <div class="quick-stats" id="quick-stats-panel">
+                    <div class="stat-card">
+                        <span class="stat-label">数据表总数</span>
+                        <span class="stat-val">3</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">数据行数 (rooms)</span>
+                        <span class="stat-val">67</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">送礼总频次</span>
+                        <span class="stat-val">47.3K</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">发言总弹幕</span>
+                        <span class="stat-val">253.6K</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- SQL Editor Section -->
+            <section class="editor-section glass-panel">
+                <div class="section-header">
+                    <h3><i class="fas fa-code"></i> SQL 编辑器 <span id="ai-active-indicator" class="badge-ai" style="display:none">AI 生成</span></h3>
+                    <div class="editor-actions">
+                        <button id="btn-format" class="btn btn-secondary" title="格式化 SQL (快捷键: Alt+F)"><i class="fas fa-align-left"></i> 格式化</button>
+                        <button id="btn-clear" class="btn btn-secondary"><i class="fas fa-trash-alt"></i> 清空</button>
+                        <button id="btn-run" class="btn btn-primary" title="执行查询 (快捷键: Cmd/Ctrl+Enter)"><i class="fas fa-play"></i> 执行查询</button>
+                    </div>
+                </div>
+                <div class="sql-editor-wrapper">
+                    <div class="line-numbers" id="line-numbers">1</div>
+                    <textarea id="sql-editor" spellcheck="false" placeholder="SELECT * FROM rooms LIMIT 10;"></textarea>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section glass-panel" id="results-panel">
+                <div class="results-tabs">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="tab-table"><i class="fas fa-table"></i> 数据表格</button>
+                        <button class="tab-btn" data-tab="tab-chart" id="tab-chart-btn"><i class="fas fa-chart-bar"></i> 可视化图表</button>
+                    </div>
+                    <div class="results-meta" id="results-meta">
+                        <!-- Query performance info here -->
+                    </div>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="tab-content active" id="tab-table">
+                    <div class="table-toolbar">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="table-search" placeholder="在当前页检索数据...">
+                        </div>
+                        <div class="pagination-info" id="pagination-info">
+                            <!-- Pagination text -->
+                        </div>
+                    </div>
+                    <div class="table-wrapper" id="table-wrapper">
+                        <div class="empty-state">
+                            <span class="empty-icon">📂</span>
+                            <p>输入 SQL，使用预设模板，或在 AI 助手中提问以加载数据</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-chart">
+                    <div class="chart-controls">
+                        <div class="control-group">
+                            <label for="chart-type-select">图表类型</label>
+                            <select id="chart-type-select">
+                                <option value="bar">柱状图 (Bar Chart)</option>
+                                <option value="line">折线图 (Line Chart)</option>
+                                <option value="pie">饼图 (Pie Chart)</option>
+                                <option value="scatter">散点图 (Scatter Plot)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="chart-x-select">X 轴 (类目字段)</label>
+                            <select id="chart-x-select"></select>
+                        </div>
+                        <div class="control-group">
+                            <label for="chart-y-select">Y 轴 (数值字段)</label>
+                            <select id="chart-y-select"></select>
+                        </div>
+                        <button id="btn-update-chart" class="btn btn-secondary">更新图表</button>
+                    </div>
+                    <div class="chart-wrapper">
+                        <div id="chart-container"></div>
+                        <div class="empty-state" id="chart-empty-state">
+                            <span class="empty-icon">📊</span>
+                            <p>请选择 X 轴与 Y 轴字段，并生成图表</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Error Toast -->
+    <div id="error-toast" class="toast error-toast">
+        <i class="fas fa-exclamation-circle toast-icon"></i>
+        <div class="toast-body">
+            <strong class="toast-title">执行失败</strong>
+            <p id="error-message" class="toast-msg">错误信息</p>
+        </div>
+        <button id="btn-close-toast" class="toast-close">&times;</button>
+    </div>
+
+    <!-- App JS -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Credentials
+.env
+.env.*
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large Database/Data files
+*.db
+*.tsv
+
+# System files
+.DS_Store
