@@ -3,204 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>直播数据分析看板 - Blank-S9 Livestream Analyzer</title>
-    <!-- Google Fonts Outfit & JetBrains Mono -->
+    <title>Blank-S9 直播数据分析中心</title>
+    <!-- Google Fonts Outfit & Noto Sans SC -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <!-- ECharts CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --bg-dark: #07080f;
+            --panel-bg: rgba(18, 20, 32, 0.65);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --glow-color: rgba(139, 92, 246, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Outfit', 'Noto Sans SC', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            background-image: radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.12) 0px, transparent 50%);
+            overflow-x: hidden;
+        }
+        .portal-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            align-items: center;
+        }
+        header {
+            text-align: center;
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 30%, #c084fc 70%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        header p {
+            font-size: 15px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            width: 100%;
+        }
+        @media (max-width: 800px) {
+            .portal-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .portal-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        /* Color themes for cards */
+        .portal-card.card-blue { --theme-color: #3b82f6; --theme-glow: rgba(59, 130, 246, 0.15); }
+        .portal-card.card-purple { --theme-color: #a855f7; --theme-glow: rgba(168, 85, 247, 0.15); }
+        .portal-card.card-violet { --theme-color: #8b5cf6; --theme-glow: rgba(139, 92, 246, 0.15); }
+        .portal-card.card-amber { --theme-color: #f59e0b; --theme-glow: rgba(245, 158, 11, 0.15); }
+        
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 0% 0%, var(--theme-glow) 0%, transparent 60%);
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+        .portal-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 40px var(--theme-glow), 0 0 2px var(--theme-color);
+        }
+        .portal-card:hover::before {
+            opacity: 1;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+        }
+        .icon-box {
+            width: 54px;
+            height: 54px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: var(--theme-color);
+            transition: all 0.3s ease;
+        }
+        .portal-card:hover .icon-box {
+            background: var(--theme-color);
+            color: #000;
+            box-shadow: 0 0 15px var(--theme-glow);
+            transform: scale(1.05) rotate(5deg);
+        }
+        .arrow {
+            font-size: 16px;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+        .portal-card:hover .arrow {
+            color: var(--theme-color);
+            transform: translateX(5px);
+        }
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+        }
+        .card-body h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-body p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        footer {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.25);
+            text-align: center;
+            margin-top: 20px;
+            letter-spacing: 0.5px;
+        }
+    </style>
 </head>
 <body>
-    <div class="mesh-background"></div>
+    <div class="portal-wrapper">
+        <header>
+            <h1><i class="fas fa-cubes"></i> Blank-S9 直播数据分析中心</h1>
+            <p>选择下方的分析看板或专用翻译发言报告，快速开始您的直播互动数据分析与透视。</p>
+        </header>
 
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar glass-panel">
-            <div class="logo">
-                <span class="icon">📊</span>
-                <div class="logo-text">
-                    <h1>Blank-S9</h1>
-                    <p>直播数据分析看板</p>
+        <div class="portal-grid">
+            <!-- 1. Interactive SQL Dashboard -->
+            <a href="dashboard.html" class="portal-card card-blue">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-chart-line"></i></div>
+                    <div class="arrow"><i class="fas fa-arrow-right"></i></div>
                 </div>
-            </div>
+                <div class="card-body">
+                    <h2>交互式 SQL 数据分析看板</h2>
+                    <p>编写 SQL 语句或通过 AI 智能助手进行交互式查询。支持直连 DuckDB 数据库，自动渲染柱状图、折线图、饼图等可视化图表，并集成分析模板模板。</p>
+                </div>
+            </a>
 
-            <!-- Sidebar Navigation Tabs -->
-            <div class="sidebar-tabs">
-                <button class="s-tab-btn active" data-stab="stab-schema">
-                    <i class="fas fa-database"></i> 结构 & 模板
-                </button>
-                <button class="s-tab-btn" data-stab="stab-ai" id="s-tab-ai-btn">
-                    <i class="fas fa-robot"></i> AI 智能助手
-                </button>
-            </div>
+            <!-- 2. All Comments Report -->
+            <a href="comments_report.html" class="portal-card card-purple">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-comments"></i></div>
+                    <div class="arrow"><i class="fas fa-arrow-right"></i></div>
+                </div>
+                <div class="card-body">
+                    <h2>完整发言中文翻译报告</h2>
+                    <p>汇总当前直播所有的发言记录，提供高精度 Simplified Chinese（中文翻译）对照，以用户数为主键进行分页展示（每页 50 个用户），支持全文模糊检索。</p>
+                </div>
+            </a>
 
-            <!-- Tab 1: Schema & Presets -->
-            <div class="s-tab-content active" id="stab-schema">
-                <!-- Database Schema Section -->
-                <div class="sidebar-section">
-                    <h2><i class="fas fa-project-diagram"></i> 数据库结构 (Schema)</h2>
-                    <div id="schema-container" class="schema-list">
-                        <div class="loading-small">加载结构中...</div>
-                    </div>
+            <!-- 3. Follower Comments Report -->
+            <a href="follower_comments_report.html" class="portal-card card-violet">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-user-check"></i></div>
+                    <div class="arrow"><i class="fas fa-arrow-right"></i></div>
                 </div>
+                <div class="card-body">
+                    <h2>已关注用户发言记录报告</h2>
+                    <p>聚焦于有关注行为的优质转化用户，按用户的关注时间从早到晚进行主列表排序。发言记录依时间正序排列，已过滤纯数字/纯符号的冗余弹幕。</p>
+                </div>
+            </a>
 
-                <!-- Query Presets Section -->
-                <div class="sidebar-section" style="margin-top: 20px;">
-                    <h2><i class="fas fa-magic"></i> 预设分析模板 (Presets)</h2>
-                    <div id="presets-container" class="presets-list">
-                        <div class="loading-small">加载预设中...</div>
-                    </div>
+            <!-- 4. Spender Comments Report -->
+            <a href="spender_comments_report.html" class="portal-card card-amber">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-donate"></i></div>
+                    <div class="arrow"><i class="fas fa-arrow-right"></i></div>
                 </div>
-            </div>
-
-            <!-- Tab 2: AI Dialog Chat -->
-            <div class="s-tab-content" id="stab-ai">
-                <div class="chat-container">
-                    <div class="chat-header">
-                        <span class="status-indicator"><i class="fas fa-circle text-success"></i> DeepSeek AI 引擎</span>
-                    </div>
-                    <div class="chat-messages" id="chat-messages">
-                        <div class="chat-bubble ai">
-                            <p>你好！我是您的 DeepSeek 智能分析助手。您可以直接用自然语言向我提问。</p>
-                            <p class="chat-tip">💡 试着问我：<br>
-                            - “有几个直播间？”<br>
-                            - “哪个用户的打赏金额最高？”<br>
-                            - “统计每天的总打赏金额，按时间降序”</p>
-                        </div>
-                    </div>
-                    <div class="chat-input-wrapper">
-                        <textarea id="chat-input" placeholder="按 Enter 发送，Shift+Enter 换行..." rows="1"></textarea>
-                        <button id="btn-chat-send" class="btn btn-primary" title="发送 (Enter)">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
+                <div class="card-body">
+                    <h2>打赏用户发言记录报告</h2>
+                    <p>专门聚焦打赏大户。主列表按用户打赏总金额降序（高到低）进行实力排行，头部并列显示是否关注、累计打赏金额及首次打赏时间，发言内容为过滤后的正序集合。</p>
                 </div>
-            </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Header Summary Metrics -->
-            <header class="top-header glass-panel">
-                <div class="header-title">
-                    <h2>控制台 & 数据分析</h2>
-                    <p>编写 SQL 语句或通过 AI 助手进行交互式查询</p>
-                </div>
-                <div class="quick-stats" id="quick-stats-panel">
-                    <div class="stat-card">
-                        <span class="stat-label">数据表总数</span>
-                        <span class="stat-val">3</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">数据行数 (rooms)</span>
-                        <span class="stat-val">67</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">送礼总频次</span>
-                        <span class="stat-val">47.3K</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">发言总弹幕</span>
-                        <span class="stat-val">253.6K</span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- SQL Editor Section -->
-            <section class="editor-section glass-panel">
-                <div class="section-header">
-                    <h3><i class="fas fa-code"></i> SQL 编辑器 <span id="ai-active-indicator" class="badge-ai" style="display:none">AI 生成</span></h3>
-                    <div class="editor-actions">
-                        <button id="btn-format" class="btn btn-secondary" title="格式化 SQL (快捷键: Alt+F)"><i class="fas fa-align-left"></i> 格式化</button>
-                        <button id="btn-clear" class="btn btn-secondary"><i class="fas fa-trash-alt"></i> 清空</button>
-                        <button id="btn-run" class="btn btn-primary" title="执行查询 (快捷键: Cmd/Ctrl+Enter)"><i class="fas fa-play"></i> 执行查询</button>
-                    </div>
-                </div>
-                <div class="sql-editor-wrapper">
-                    <div class="line-numbers" id="line-numbers">1</div>
-                    <textarea id="sql-editor" spellcheck="false" placeholder="SELECT * FROM rooms LIMIT 10;"></textarea>
-                </div>
-            </section>
-
-            <!-- Results Section -->
-            <section class="results-section glass-panel" id="results-panel">
-                <div class="results-tabs">
-                    <div class="tabs-header">
-                        <button class="tab-btn active" data-tab="tab-table"><i class="fas fa-table"></i> 数据表格</button>
-                        <button class="tab-btn" data-tab="tab-chart" id="tab-chart-btn"><i class="fas fa-chart-bar"></i> 可视化图表</button>
-                    </div>
-                    <div class="results-meta" id="results-meta">
-                        <!-- Query performance info here -->
-                    </div>
-                </div>
-
-                <!-- Tab Contents -->
-                <div class="tab-content active" id="tab-table">
-                    <div class="table-toolbar">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="table-search" placeholder="在当前页检索数据...">
-                        </div>
-                        <div class="pagination-info" id="pagination-info">
-                            <!-- Pagination text -->
-                        </div>
-                    </div>
-                    <div class="table-wrapper" id="table-wrapper">
-                        <div class="empty-state">
-                            <span class="empty-icon">📂</span>
-                            <p>输入 SQL，使用预设模板，或在 AI 助手中提问以加载数据</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="tab-chart">
-                    <div class="chart-controls">
-                        <div class="control-group">
-                            <label for="chart-type-select">图表类型</label>
-                            <select id="chart-type-select">
-                                <option value="bar">柱状图 (Bar Chart)</option>
-                                <option value="line">折线图 (Line Chart)</option>
-                                <option value="pie">饼图 (Pie Chart)</option>
-                                <option value="scatter">散点图 (Scatter Plot)</option>
-                            </select>
-                        </div>
-                        <div class="control-group">
-                            <label for="chart-x-select">X 轴 (类目字段)</label>
-                            <select id="chart-x-select"></select>
-                        </div>
-                        <div class="control-group">
-                            <label for="chart-y-select">Y 轴 (数值字段)</label>
-                            <select id="chart-y-select"></select>
-                        </div>
-                        <button id="btn-update-chart" class="btn btn-secondary">更新图表</button>
-                    </div>
-                    <div class="chart-wrapper">
-                        <div id="chart-container"></div>
-                        <div class="empty-state" id="chart-empty-state">
-                            <span class="empty-icon">📊</span>
-                            <p>请选择 X 轴与 Y 轴字段，并生成图表</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Error Toast -->
-    <div id="error-toast" class="toast error-toast">
-        <i class="fas fa-exclamation-circle toast-icon"></i>
-        <div class="toast-body">
-            <strong class="toast-title">执行失败</strong>
-            <p id="error-message" class="toast-msg">错误信息</p>
+            </a>
         </div>
-        <button id="btn-close-toast" class="toast-close">&times;</button>
-    </div>
 
-    <!-- App JS -->
-    <script src="app.js"></script>
+        <footer>
+            <p>Blank-S9 LIVESTREAM INTELLIGENT ANALYZER &copy; 2026</p>
+        </footer>
+    </div>
 </body>
 </html>
