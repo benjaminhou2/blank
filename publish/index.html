@@ -97,6 +97,16 @@
         .portal-card.card-purple { --theme-color: #a855f7; --theme-glow: rgba(168, 85, 247, 0.15); }
         .portal-card.card-violet { --theme-color: #8b5cf6; --theme-glow: rgba(139, 92, 246, 0.15); }
         .portal-card.card-amber { --theme-color: #f59e0b; --theme-glow: rgba(245, 158, 11, 0.15); }
+        .portal-card.card-green { --theme-color: #10b981; --theme-glow: rgba(16, 185, 129, 0.15); }
+        
+        .portal-card.card-wide {
+            grid-column: span 2;
+        }
+        @media (max-width: 800px) {
+            .portal-card.card-wide {
+                grid-column: span 1;
+            }
+        }
         
         .portal-card::before {
             content: '';
@@ -187,7 +197,7 @@
 
         <div class="portal-grid">
             <!-- 1. Interactive SQL Dashboard -->
-            <a href="dashboard.html" class="portal-card card-blue">
+            <a href="dashboard.html" class="portal-card card-blue card-wide">
                 <div class="card-header">
                     <div class="icon-box"><i class="fas fa-chart-line"></i></div>
                     <div class="arrow"><i class="fas fa-arrow-right"></i></div>
@@ -231,6 +241,18 @@
                 <div class="card-body">
                     <h2>打赏用户发言记录报告</h2>
                     <p>专门聚焦打赏大户。主列表按用户打赏总金额降序（高到低）进行实力排行，头部并列显示是否关注、累计打赏金额及首次打赏时间，发言内容为过滤后的正序集合。</p>
+                </div>
+            </a>
+
+            <!-- 5. Spender List -->
+            <a href="spender_list.html" class="portal-card card-green">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-trophy"></i></div>
+                    <div class="arrow"><i class="fas fa-arrow-right"></i></div>
+                </div>
+                <div class="card-body">
+                    <h2>打赏用户清单排行榜</h2>
+                    <p>汇总所有有打赏记录的用户，按打赏总金额降序（高到低）排序。清晰展示用户 ID、是否关注、关注时间、累计打赏金额、首次打赏时间及发言总条数。</p>
                 </div>
             </a>
         </div>
